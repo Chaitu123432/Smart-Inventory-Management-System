@@ -1,1 +1,66 @@
- 
+services:
+  - type: web
+    name: smart-inventory-frontend
+    env: static
+    buildCommand: |
+      cd frontend
+      npm install --legacy-peer-deps
+      npm run build
+    staticPublishPath: ./frontend/build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://smart-inventory-backend.onrender.com
+      - key: NODE_ENV
+        value: production
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  - type: web
+    name: smart-inventory-backend
+    env: node
+    region: ohio
+    plan: free
+    buildCommand: |
+      cd backend
+      npm install --legacy-peer-deps
+      npm run build
+    startCommand: cd backend && node dist/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: DB_HOST
+        fromDatabase:
+          name: smart-inventory-db
+          property: host
+      - key: DB_NAME
+        fromDatabase:
+          name: smart-inventory-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: smart-inventory-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: smart-inventory-db
+          property: password
+      - key: DB_PORT
+        fromDatabase:
+          name: smart-inventory-db
+          property: port
+      - key: CORS_ORIGIN
+        value: https://smart-inventory-frontend.onrender.com
+      - key: HUGGING_FACE_API_KEY
+        sync: false
+    healthCheckPath: /health
+
+databases:
+  - name: smart-inventory-db
+    databaseName: smart_inventory
+    user: smart_inventory_user
+    plan: free
+    region: ohio 
