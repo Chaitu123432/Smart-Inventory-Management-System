@@ -26,7 +26,7 @@ services:
       cd backend
       npm install --legacy-peer-deps
       npm run build
-    startCommand: cd backend && node dist/server.js
+    startCommand: cd backend && npm run build && node dist/index.js
     envVars:
       - key: NODE_ENV
         value: production
@@ -56,7 +56,7 @@ services:
         value: https://smart-inventory-frontend.onrender.com
       - key: HUGGING_FACE_API_KEY
         sync: false
-    healthCheckPath: /health
+    healthCheckPath: /api/health
 
 databases:
   - name: smart-inventory-db
