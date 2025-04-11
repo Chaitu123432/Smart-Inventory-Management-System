@@ -39,8 +39,8 @@ A full-stack inventory management system with AI-powered forecasting and automat
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/inventory-management.git
-cd inventory-management
+git clone https://github.com/Chaitu123432/Smart-Inventory-Management-System.git
+cd Smart-Inventory-Management-System
 ```
 
 2. Install dependencies:
@@ -84,23 +84,44 @@ npm start
 ### Frontend (.env)
 ```
 REACT_APP_API_URL=http://localhost:3001
+REACT_APP_ENV=development
 ```
 
 ### Backend (.env)
 ```
+# Server Configuration
 PORT=3001
-DB_USER=postgres
+NODE_ENV=development
+
+# Database Configuration
 DB_HOST=localhost
-DB_NAME=inventory_management
-DB_PASSWORD=your_password
 DB_PORT=5432
-HUGGING_FACE_API_KEY=your_api_key
+DB_NAME=inventory_management
+DB_USER=postgres
+DB_PASSWORD=postgres
+
+# JWT Configuration
+JWT_SECRET=your_jwt_secret_key_here
+JWT_EXPIRES_IN=24h
+
+# API Rate Limiting
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX=100
+
+# Logging
+LOG_LEVEL=info
+
+# CORS Configuration
+CORS_ORIGIN=http://localhost:3000
+
+# API Keys
+HUGGING_FACE_API_KEY=your_api_key_here
 ```
 
 ## Project Structure
 
 ```
-inventory-management/
+Smart-Inventory-Management-System/
 ├── frontend/             # React frontend
 │   ├── src/
 │   │   ├── components/   # Reusable components
