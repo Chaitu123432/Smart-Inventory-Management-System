@@ -1,0 +1,43 @@
+{
+  "name": "inventory-management-backend",
+  "version": "1.0.0",
+  "description": "Backend for Smart Inventory Management System",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "init-db": "node src/db/init.js",
+    "test": "jest"
+  },
+  "keywords": ["inventory", "management", "api", "express", "postgresql", "ai"],
+  "license": "MIT",
+  "dependencies": {
+    "@huggingface/inference": "^3.7.1",
+    "@vonage/server-sdk": "^3.5.1",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.7.0",
+    "googleapis": "^118.0.0",
+    "helmet": "^7.0.0",
+    "jsonwebtoken": "^9.0.0",
+    "moment": "^2.29.4",
+    "morgan": "^1.10.0",
+    "node-fetch": "^2.6.11",
+    "nodemailer": "^6.9.3",
+    "pg": "^8.10.0",
+    "sequelize": "^6.32.0",
+    "uuid": "^9.0.0",
+    "winston": "^3.8.2",
+    "woocommerce-api": "^1.5.0",
+    "zoho-books-js": "^1.0.1"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "nodemon": "^2.0.22",
+    "sequelize-cli": "^6.6.2",
+    "supertest": "^6.3.3"
+  }
+}
