@@ -6,9 +6,9 @@ module.exports = {
     await queryInterface.createTable('Users', {
       id: {
         allowNull: false,
-        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4
       },
       username: {
         type: Sequelize.STRING,
@@ -61,10 +61,10 @@ module.exports = {
     // Create Products table
     await queryInterface.createTable('Products', {
       id: {
-        allowNull: false,
-        autoIncrement: true,
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        allowNull: false
       },
       name: {
         type: Sequelize.STRING,
@@ -154,7 +154,7 @@ module.exports = {
         allowNull: false
       },
       productId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
         references: {
           model: 'Products',
           key: 'id'
@@ -239,13 +239,14 @@ module.exports = {
     // Create Forecasts table
     await queryInterface.createTable('Forecasts', {
       id: {
-        allowNull: false,
-        autoIncrement: true,
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        allowNull: false
       },
       productId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
+        allowNull: false,
         references: {
           model: 'Products',
           key: 'id'

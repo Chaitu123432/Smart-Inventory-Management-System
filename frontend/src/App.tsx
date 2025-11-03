@@ -1,6 +1,11 @@
 // @ts-nocheck
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import InventoryPage from './pages/InventoryPage';
@@ -18,48 +23,39 @@ function App() {
         <InventoryProvider>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
-            
-            <Route 
-              path="/" 
-              element={<Navigate to="/dashboard" replace />} 
-            />
-            
-            <Route 
-              path="/dashboard" 
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route
+              path="/dashboard"
               element={
                 <PrivateRoute>
                   <DashboardPage />
                 </PrivateRoute>
-              } 
+              }
             />
-            
-            <Route 
-              path="/inventory" 
+            <Route
+              path="/inventory"
               element={
                 <PrivateRoute>
                   <InventoryPage />
                 </PrivateRoute>
-              } 
+              }
             />
-            
-            <Route 
-              path="/forecasting" 
+            <Route
+              path="/forecasting"
               element={
                 <PrivateRoute>
                   <ForecastingPage />
                 </PrivateRoute>
-              } 
+              }
             />
-            
-            <Route 
-              path="/settings" 
+            <Route
+              path="/settings"
               element={
                 <PrivateRoute>
                   <SettingsPage />
                 </PrivateRoute>
-              } 
+              }
             />
-            
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </InventoryProvider>
@@ -68,4 +64,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App;

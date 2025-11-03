@@ -78,8 +78,41 @@ const getAllForecasts = async (req, res) => {
     // Calculate total pages
     const totalPages = Math.ceil(count / limit);
 
+    // Transform forecasts to match frontend format
+    const formattedForecasts = forecasts.map(forecast => {
+      try {
+        const dailyForecastData = forecast.dailyForecastData || [];
+        const totalDemand = forecast.totalDemand || 1; // Prevent division by zero
+        
+        return {
+          id: forecast.id,
+          productId: forecast.productId,
+          productName: forecast.product?.name || 'Unknown Product',
+          historicalData: [], // Will be populated on individual forecast fetch
+          forecastedData: dailyForecastData.map(day => {
+            const demand = day?.demand || 0;
+            return {
+              date: day?.date || new Date().toISOString(),
+              forecast: demand,
+              lowerBound: Math.max(0, Math.round(demand * ((forecast.lowerBound || 0) / totalDemand))),
+              upperBound: Math.round(demand * ((forecast.upperBound || demand) / totalDemand))
+            };
+          })
+        };
+      } catch (error) {
+        logger.error(`Error formatting forecast ${forecast.id}:`, error);
+        return {
+          id: forecast.id,
+          productId: forecast.productId,
+          productName: 'Error loading forecast',
+          historicalData: [],
+          forecastedData: []
+        };
+      }
+    });
+
     res.status(200).json({
-      forecasts,
+      forecasts: formattedForecasts,
       pagination: {
         total: count,
         currentPage: parseInt(page),
@@ -324,6 +357,8 @@ const deleteForecast = async (req, res) => {
  */
 const generateForecast = async (req, res) => {
   try {
+    logger.info('Starting forecast generation with request:', JSON.stringify(req.body));
+    
     const {
       productId,
       period = 30,
@@ -332,11 +367,23 @@ const generateForecast = async (req, res) => {
       confidenceLevel = 95
     } = req.body;
 
+    if (!productId) {
+      logger.warn('Attempt to generate forecast without productId');
+      return res.status(400).json({ 
+        error: { message: 'productId is required' }
+      });
+    }
+
     // Check if product exists
     const product = await Product.findByPk(productId);
     if (!product) {
-      return res.status(404).json({ error: { message: 'Product not found' } });
+      logger.warn(`Product not found for ID: ${productId}`);
+      return res.status(404).json({ 
+        error: { message: 'Product not found' }
+      });
     }
+
+    logger.info(`Found product ${product.name} (${product.id}), fetching historical sales...`);
 
     // Get historical sales data
     const historicalSales = await Transaction.findAll({
@@ -415,7 +462,9 @@ const generateForecast = async (req, res) => {
       
       dailyForecastData.push({
         date: currentDate.toISOString().split('T')[0],
-        demand: dailyDemand
+        forecast: dailyDemand,
+        lowerBound: Math.max(0, Math.round(dailyDemand * (lowerBound / totalDemand))),
+        upperBound: Math.round(dailyDemand * (upperBound / totalDemand))
       });
       
       // Move to next day
@@ -465,9 +514,21 @@ const generateForecast = async (req, res) => {
       ]
     });
     
+    // Format response to match frontend expectations
+    const formattedForecast = {
+      id: fullForecast.id,
+      productId: fullForecast.productId,
+      productName: fullForecast.product?.name || 'Unknown Product',
+      historicalData: historicalSales.map(sale => ({
+        date: sale.transactionDate.toISOString().split('T')[0],
+        sales: sale.quantity
+      })),
+      forecastedData: dailyForecastData
+    };
+
     res.status(201).json({
       message: 'Forecast generated successfully',
-      forecast: fullForecast
+      forecast: formattedForecast
     });
   } catch (error) {
     logger.error('Generate forecast error:', error);

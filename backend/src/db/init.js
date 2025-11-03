@@ -4,14 +4,14 @@ const { sequelize } = require('../models');
 async function initializeDatabase() {
   try {
     await sequelize.authenticate();
-    // Use sequelize.query() instead of pool.query()
-    // or use sequelize.sync() to auto-create tables
-    await sequelize.sync({ force: false });
-    console.log('Database initialized successfully!');
+    console.log('⚠️  WARNING: This will DROP all existing tables!');
+    // Change force to true to recreate tables
+    await sequelize.sync({ force: true });
+    console.log('✅ Database tables recreated successfully!');
   } catch (error) {
-    console.error('Error initializing database:', error);
+    console.error('❌ Error initializing database:', error);
   } finally {
-    process.exit(); // Exit once the task is done
+    process.exit();
   }
 }
 

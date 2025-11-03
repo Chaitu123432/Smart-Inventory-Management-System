@@ -6,11 +6,15 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true
     },
     type: {
-      type: DataTypes.ENUM('purchase', 'sale', 'adjustment', 'return', 'transfer'),
+      type: DataTypes.STRING,
       allowNull: false,
       validate: {
         notEmpty: {
           msg: 'Transaction type cannot be empty'
+        },
+        isIn: {
+          args: [['purchase', 'sale', 'adjustment', 'return', 'transfer']],
+          msg: 'Invalid transaction type'
         }
       }
     },
@@ -18,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: 'Products',
+        model: 'products',
         key: 'id'
       }
     },
@@ -61,14 +65,20 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: 'Users',
+        model: 'users',
         key: 'id'
       }
     },
     status: {
-      type: DataTypes.ENUM('pending', 'completed', 'cancelled'),
+      type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: 'completed'
+      defaultValue: 'completed',
+      validate: {
+        isIn: {
+          args: [['pending', 'completed', 'cancelled']],
+          msg: 'Invalid status'
+        }
+      }
     },
     transactionDate: {
       type: DataTypes.DATE,
@@ -79,11 +89,12 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.UUID,
       allowNull: true,
       references: {
-        model: 'Transactions',
+        model: 'transactions',
         key: 'id'
       }
     }
   }, {
+    tableName: 'transactions',
     timestamps: true,
     hooks: {
       afterCreate: async (transaction, options) => {

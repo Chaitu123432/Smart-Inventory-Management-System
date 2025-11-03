@@ -63,20 +63,21 @@ const getAllProducts = async (req, res) => {
       order: [[sortBy, sortOrder.toUpperCase()]],
       offset,
       limit: parseInt(limit),
-      include: [
-        {
-          model: Transaction,
-          as: 'transactions',
-          required: false,
-          attributes: ['id', 'type', 'quantity', 'transactionDate'],
-          where: {
-            type: 'sale',
-            transactionDate: {
-              [Op.gte]: new Date(new Date().setDate(new Date().getDate() - 30))
-            }
-          }
-        }
-      ]
+      // REMOVED: Transaction include - causing error due to missing association
+      // include: [
+      //   {
+      //     model: Transaction,
+      //     as: 'transactions',
+      //     required: false,
+      //     attributes: ['id', 'type', 'quantity', 'transactionDate'],
+      //     where: {
+      //       type: 'sale',
+      //       transactionDate: {
+      //         [Op.gte]: new Date(new Date().setDate(new Date().getDate() - 30))
+      //       }
+      //     }
+      //   }
+      // ]
     });
 
     // Calculate total value of inventory
@@ -117,15 +118,16 @@ const getProductById = async (req, res) => {
     const { id } = req.params;
     
     const product = await Product.findByPk(id, {
-      include: [
-        {
-          model: Transaction,
-          as: 'transactions',
-          required: false,
-          limit: 20,
-          order: [['transactionDate', 'DESC']]
-        }
-      ]
+      // REMOVED: Transaction include
+      // include: [
+      //   {
+      //     model: Transaction,
+      //     as: 'transactions',
+      //     required: false,
+      //     limit: 20,
+      //     order: [['transactionDate', 'DESC']]
+      //   }
+      // ]
     });
     
     if (!product) {

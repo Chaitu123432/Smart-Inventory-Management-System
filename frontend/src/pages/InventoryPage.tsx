@@ -258,7 +258,11 @@ const InventoryPage: React.FC = () => {
       {
         Header: 'Price',
         accessor: 'price',
-        Cell: ({ value }: { value: number }) => `$${value.toFixed(2)}`,
+        Cell: ({ value }: { value: number | string }) => {
+          // Convert string to number if needed (PostgreSQL DECIMAL returns as string)
+          const price = typeof value === 'string' ? parseFloat(value) : value;
+          return `$${price ? price.toFixed(2) : '0.00'}`;
+        },
       },
       {
         Header: 'Status',

@@ -1,8 +1,8 @@
 module.exports = (sequelize, DataTypes) => {
   const Product = sequelize.define('Product', {
     id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
       primaryKey: true
     },
     name: {
@@ -24,22 +24,13 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
     category: {
       type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        notEmpty: {
-          msg: 'Category cannot be empty'
-        }
-      }
+      allowNull: true
     },
     price: {
       type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
+      allowNull: true,
       validate: {
         isDecimal: {
           msg: 'Price must be a valid decimal number'
@@ -64,92 +55,49 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
-    minStockLevel: {
+    min_stock_level: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       defaultValue: 10,
-      validate: {
-        isInt: {
-          msg: 'Minimum stock level must be an integer'
-        },
-        min: {
-          args: [0],
-          msg: 'Minimum stock level must be greater than or equal to 0'
-        }
-      }
+      field: 'min_stock_level'
     },
-    status: {
-      type: DataTypes.ENUM('In Stock', 'Low Stock', 'Out of Stock'),
-      allowNull: false,
-      defaultValue: 'In Stock'
-    },
-    location: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    supplier: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    barcode: {
-      type: DataTypes.STRING,
+    reorder_point: {
+      type: DataTypes.INTEGER,
       allowNull: true,
-      unique: true
+      field: 'reorder_point'
     },
-    createdBy: {
-      type: DataTypes.UUID,
-      references: {
-        model: 'Users',
-        key: 'id',
-      },
-      onDelete: 'SET NULL',
-      onUpdate: 'CASCADE',
-    },
-    imageUrl: {
-      type: DataTypes.STRING,
+    safety_stock: {
+      type: DataTypes.INTEGER,
       allowNull: true,
-      validate: {
-        isUrl: {
-          msg: 'Image URL must be a valid URL'
-        }
-      }
+      field: 'safety_stock'
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
     }
   }, {
-    timestamps: true,
-    paranoid: true, // Implements soft delete (deletedAt)
-    hooks: {
-      beforeSave: async (product) => {
-        // Update product status based on quantity and minStockLevel
-        if (product.quantity === 0) {
-          product.status = 'Out of Stock';
-        } else if (product.quantity <= product.minStockLevel) {
-          product.status = 'Low Stock';
-        } else {
-          product.status = 'In Stock';
-        }
-      }
-    }
+    tableName: 'products',
+    timestamps: false
   });
 
   // Set up associations
   Product.associate = (models) => {
-    // A product belongs to a user (who created it)
-    Product.belongsTo(models.User, {
-      foreignKey: 'createdBy',
-      as: 'creator'
-    });
-    
-    // A product can be part of many transactions
-    Product.hasMany(models.Transaction, {
-      foreignKey: 'productId',
-      as: 'transactions'
-    });
-    
-    // A product can have many forecasts
-    Product.hasMany(models.Forecast, {
-      foreignKey: 'productId',
-      as: 'forecasts'
-    });
+    if (models.OrderItem) {
+      Product.hasMany(models.OrderItem, {
+        foreignKey: 'product_id',
+        as: 'orderItems'
+      });
+    }
+    if (models.Forecast) {
+      Product.hasMany(models.Forecast, {
+        foreignKey: 'product_id',
+        as: 'forecasts'
+      });
+    }
   };
 
   return Product;

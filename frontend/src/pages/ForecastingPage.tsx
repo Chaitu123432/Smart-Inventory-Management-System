@@ -38,7 +38,8 @@ interface Product {
 }
 
 const ForecastingPage: React.FC = () => {
-  const [forecasts, setForecasts] = useState<Forecast[]>([]);
+  const [forecasts, setForecasts] = useState<ForecastData[]>([]);
+  const [products, setProducts] = useState<Product[]>([]); // Add products state
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
@@ -46,22 +47,47 @@ const ForecastingPage: React.FC = () => {
 
   useEffect(() => {
     fetchForecasts();
+    fetchProducts(); // Add this
   }, []);
+
+  // Add this function to fetch products
+  const fetchProducts = async () => {
+    try {
+      const response = await productsAPI.getAll();
+      if (response.data && response.data.products) {
+        setProducts(response.data.products);
+      }
+    } catch (err) {
+      console.error('Error fetching products:', err);
+    // Don't set error here - just log it
+    setProducts([]);
+    }
+  };
 
   const fetchForecasts = async () => {
     setIsLoading(true);
     setError(null);
     
     try {
-      const response = await fetch('/api/forecasts');
-      if (response.ok) {
-        const data = await response.json();
-        setForecasts(data);
+      // Use forecastsAPI instead of raw fetch - this includes auth token and base URL
+      const response = await forecastsAPI.getAll();
+      if (response.data && response.data.forecasts) {
+        setForecasts(response.data.forecasts);
+      } else if (Array.isArray(response.data)) {
+        setForecasts(response.data);
       } else {
-        setError('Failed to fetch forecasts');
+        // If no forecasts exist yet, set empty array (not an error)
+        setForecasts([]);
       }
-    } catch (err) {
-      setError('Error fetching forecasts');
+    } catch (err: any) {
+      console.error('Error fetching forecasts:', err);
+      // If it's a 401 or 403, it might be auth issue - show that
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setError('Authentication required. Please log in.');
+      } else {
+        setError(err.response?.data?.error?.message || 'Error fetching forecasts');
+      }
+      setForecasts([]); // Set empty array on error
     } finally {
       setIsLoading(false);
     }
@@ -77,24 +103,17 @@ const ForecastingPage: React.FC = () => {
     setError(null);
     
     try {
-      const response = await fetch('/api/forecasts/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          productId: selectedProduct,
-          period: forecastPeriod
-        }),
+      // Use forecastsAPI instead of raw fetch
+      await forecastsAPI.generate({
+        productId: selectedProduct,
+        period: forecastPeriod
       });
       
-      if (response.ok) {
-        await fetchForecasts();
-      } else {
-        setError('Failed to generate forecast');
-      }
-    } catch (err) {
-      setError('Error generating forecast');
+      // Refresh forecasts after generating
+      await fetchForecasts();
+    } catch (err: any) {
+      console.error('Error generating forecast:', err);
+      setError(err.response?.data?.error?.message || 'Error generating forecast');
     } finally {
       setIsLoading(false);
     }
@@ -279,9 +298,9 @@ const ForecastingPage: React.FC = () => {
               className="w-full px-3 py-2 border rounded-md"
             >
               <option value="">Select a product</option>
-              {forecasts.map((forecast) => (
-                <option key={forecast.productId} value={forecast.productId}>
-                  {forecast.productName}
+              {products.map((product) => ( // Change from forecasts to products
+                <option key={product.id} value={product.id}>
+                  {product.name}
                 </option>
               ))}
             </select>

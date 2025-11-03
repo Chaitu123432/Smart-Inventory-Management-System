@@ -45,9 +45,12 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     role: {
-      type: DataTypes.ENUM('admin', 'manager'),
+      type: DataTypes.STRING,
       defaultValue: 'manager',
-      allowNull: false
+      allowNull: false,
+      validate: {
+        isIn: [['admin', 'manager']]
+      }
     },
     firstName: {
       type: DataTypes.STRING,
@@ -66,6 +69,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     }
   }, {
+    tableName: 'users',
     timestamps: true,
     paranoid: true, // Implements soft delete (deletedAt)
     hooks: {

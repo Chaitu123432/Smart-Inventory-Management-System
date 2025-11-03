@@ -10,13 +10,22 @@
     "init-db": "node src/db/init.js",
     "test": "jest"
   },
-  "keywords": ["inventory", "management", "api", "express", "postgresql", "ai"],
+  "keywords": [
+    "inventory",
+    "management",
+    "api",
+    "express",
+    "postgresql",
+    "ai"
+  ],
   "license": "MIT",
   "dependencies": {
     "@huggingface/inference": "^3.7.1",
     "@vonage/server-sdk": "^3.5.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "csv": "^6.4.1",
+    "csv-parser": "^3.2.0",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "express-rate-limit": "^6.7.0",
@@ -27,6 +36,7 @@
     "morgan": "^1.10.0",
     "node-fetch": "^2.6.11",
     "nodemailer": "^6.9.3",
+    "parser": "^0.1.4",
     "pg": "^8.10.0",
     "sequelize": "^6.32.0",
     "uuid": "^9.0.0",

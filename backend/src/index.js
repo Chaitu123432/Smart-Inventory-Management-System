@@ -8,58 +8,86 @@ const { sequelize } = require('./models');
 const routes = require('./routes');
 const errorHandler = require('./middleware/errorHandler');
 const logger = require('./utils/logger');
+const { seedDataIfNeeded } = require('./utils/seedAndLoadData');
 
 // Create Express app
 const app = express();
 
-// Set up middleware
-app.use(helmet()); // Security headers
-app.use(cors()); // Enable CORS
-app.use(express.json()); // Parse JSON bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
-app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } })); // HTTP request logging
+// ========================
+// Middleware Setup
+// ========================
+app.use(helmet());
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Apply rate limiting
+// Request Logging
+app.use(
+  morgan('combined', {
+    stream: { write: (message) => logger.info(message.trim()) },
+  })
+);
+
+// ========================
+// Rate Limiting
+// ========================
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again after 15 minutes'
+  max: 100, // limit each IP to 100 requests per window
+  message: 'Too many requests from this IP, please try again later.',
 });
 app.use('/api/', limiter);
 
+// ========================
 // Routes
+// ========================
 app.use('/api', routes);
 
-// Default route
+// Default Route
 app.get('/', (req, res) => {
-  res.send('Smart Inventory Management System API');
+  res.send('🚀 Smart Inventory Management System API is running');
 });
 
-// Error handling middleware
+// Error Handling Middleware
 app.use(errorHandler);
 
-// Start server
 const PORT = process.env.PORT || 5000;
 
-// Connect to database and start server
+// ========================
+// Database + Server Start
+// ========================
 const startServer = async () => {
   try {
+    logger.info('🧠 Connecting to PostgreSQL database...');
     await sequelize.authenticate();
-    logger.info('Database connection has been established successfully.');
-    
-    if (process.env.NODE_ENV === 'development') {
-      // Sync database models in development
-      await sequelize.sync({ alter: true });
-      logger.info('Database models synchronized.');
-    }
-    
+    logger.info('✅ Database connection established successfully.');
+
+    // Sync database models
+    await sequelize.sync({ alter: true });
+    logger.info('🔁 Database models synchronized.');
+
+    // Seed dataset from CSV files if needed
+    logger.info('🌱 Checking for initial dataset...');
+    await seedDataIfNeeded();
+
+    // Start Express Server
     app.listen(PORT, () => {
-      logger.info(`Server running on port ${PORT}`);
+      logger.info(`🚀 Server running successfully on port ${PORT}`);
     });
   } catch (error) {
-    logger.error('Unable to connect to the database or start server:', error);
+    logger.error(`❌ Failed to start server or connect to DB: ${error.message}`);
     process.exit(1);
   }
 };
 
-startServer(); 
+// Start server
+startServer();
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error(`⚠️ Unhandled Promise Rejection: ${reason}`);
+});
+
+process.on('uncaughtException', (error) => {
+  logger.error(`💥 Uncaught Exception: ${error.message}`);
+  process.exit(1);
+});
