@@ -131,7 +131,7 @@ async function optimizeInventory(req, res) {
     res.status(500).json({ status: 'error', message: 'Failed to optimize inventory', detail: error.message });
   }
 }
-
+// Model training
 async function trainModel(req, res) {
   try {
     const { productId, modelType = 'rf' } = req.body;
