@@ -5,6 +5,7 @@ statsmodels==0.14.0
 joblib==1.2.0
 tensorflow==2.12.0
 matplotlib==3.7.1 
-Flask
-Flask-Cors
-Gunicorn
+Flask==2.3.2
+Flask-Cors==3.0.10
+gunicorn==21.2.0
+
